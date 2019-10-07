@@ -38,13 +38,13 @@ namespace GuidInProjection
                 var childId = Guid.NewGuid();
                 db.Entities.Add(new EntityType() {Id = childId, Name = "adsf"});
                 db.SaveChanges();
-                var fromSql = db.Entities.FromSql($@"with cte(id)
+                var fromSql = db.Entities.FromSqlInterpolated($@"with cte(id)
 as (select top 1 id from Entities where id={childId}
 union all 
 select e.ParentId as Id from Entities e inner join cte on cte.id=e.Id
 )
 select d.* from cte inner join Entities d on d.id=cte.id");
-                var all = fromSql.ToList();
+                var all = fromSql.Where(a=>a.Id == childId).ToList();
                 var projectionTest = fromSql
                     .Select(a => new ProjectionType { SomeOtherId = a.Id, Name = a.Name }).ToList();
             }
